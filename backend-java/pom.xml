@@ -16,7 +16,7 @@
     <name>Football Value Betting Engine</name>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>21</java.version>
     </properties>
 
     <dependencies>
