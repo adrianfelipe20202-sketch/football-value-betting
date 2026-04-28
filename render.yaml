@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: football-value-engine
+    runtime: docker
+    rootDir: backend-java
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: API_FOOTBALL_KEY
+        sync: false
