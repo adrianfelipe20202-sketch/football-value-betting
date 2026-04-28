@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:football_betting}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  h2:
+    console:
+      enabled: ${H2_CONSOLE_ENABLED:true}
+      path: /h2-console
+
+api:
+  football:
+    key: ${API_FOOTBALL_KEY:}
+    base-url: https://v3.football.api-sports.io
+    daily-limit: 100
+
+bankroll:
+  initial: 1000000
+
+value:
+  engine:
+    min-ev-threshold: 0.05
+    elite-ev-threshold: 0.15
+    elite-confidence: 85
+    kelly-fraction: 0.25
