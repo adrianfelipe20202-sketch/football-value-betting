@@ -17,12 +17,34 @@ export function AlertsDashboard() {
   const [filter, setFilter] = useState<Rank | 'ALL'>('ALL');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<StatusResponse | null>(null);
+  const [waking, setWaking] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
-    const fetchStatus = () => api.getStatus().then(setStatus).catch(() => {});
+    let attempts = 0;
+    let retryTimeout: ReturnType<typeof setTimeout>;
+
+    const fetchStatus = () => {
+      api.getStatus()
+        .then(s => {
+          setStatus(s);
+          setWaking(false);
+          setInitialLoad(false);
+          attempts = 0;
+        })
+        .catch(() => {
+          attempts++;
+          if (attempts >= 2 && initialLoad) {
+            setWaking(true);
+          }
+          if (waking || initialLoad) {
+            retryTimeout = setTimeout(fetchStatus, 3000);
+          }
+        });
+    };
     fetchStatus();
     const interval = setInterval(fetchStatus, 10000);
-    return () => clearInterval(interval);
+    return () => { clearInterval(interval); clearTimeout(retryTimeout); };
   }, []);
 
   const filtered = filter === 'ALL'
@@ -130,7 +152,19 @@ export function AlertsDashboard() {
 
       {/* Alerts Grid */}
       <main className="max-w-7xl mx-auto px-4 py-6 pb-16">
-        {filtered.length === 0 ? (
+        {waking ? (
+          <div className="text-center py-20">
+            <div className="text-4xl mb-4 animate-bounce">&#9889;</div>
+            <h2 className="text-yellow-400 text-lg mb-2 font-bold">Despertando servidor...</h2>
+            <p className="text-gray-400 text-sm mb-2">
+              El servidor gratuito entra en reposo tras inactividad.<br />
+              Se reactiva en 20-40 segundos. Espera un momento...
+            </p>
+            <div className="mt-4 flex justify-center">
+              <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+            </div>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-4xl mb-4 opacity-30">&#9917;</div>
             <h2 className="text-gray-400 text-lg mb-2">Sin alertas activas</h2>
