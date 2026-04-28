@@ -1,12 +1,15 @@
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
+RUN mvn dependency:go-offline -q
 COPY src ./src
-RUN apk add --no-cache maven && mvn package -DskipTests -q
+RUN mvn package -DskipTests -q
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
-ENV JAVA_OPTS="-Xmx256m -Xms128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=100m"
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --spring.profiles.active=postgres --server.port=${PORT:-8080}"]
+
+ENV PORT=8080
+EXPOSE ${PORT}
+ENV JAVA_OPTS="-Xmx200m -Xms100m -XX:+UseSerialGC -XX:MaxMetaspaceSize=80m -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.port=$PORT -jar app.jar --spring.profiles.active=postgres"]
